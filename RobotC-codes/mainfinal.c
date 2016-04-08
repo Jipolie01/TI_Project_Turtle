@@ -18,11 +18,11 @@
 //const int INBOX = 5;
 
 //variables for setting the minimum and maximum values of the light sensor and colorsensor
-int maxcolor = 52;
-int mincolor = 23;
-int maxlight = 65;
-int minlight = 37;
-int limit = 70;
+int maxcolor = 56;
+int mincolor = 20;
+int maxlight = 69;
+int minlight = 34;
+int limit = 65;
 int speed = 40;
 void speed_adjust(int index, int until, int increment) {
     /*
@@ -36,8 +36,8 @@ void speed_adjust(int index, int until, int increment) {
 
 task music() {
     //plays music while robot is in motion
-    //playSoundFile("Supermario.rmd");
-    //wait1Msec(10000);
+    playSoundFile("Supermario.rmd");
+    wait1Msec(10000);
 }
 
 void linefollow(void) {
@@ -57,7 +57,7 @@ void linefollow(void) {
     nxtDisplayTextLine(3, "sonar: %d", sonar);
 
     // if an object is closer then 30 centimeters do the folowing
-    if (sonar < 10) {
+    if (sonar < 30) {
         speed_adjust(60, 0, -4); //slow down
 
         for (int i = 0; i < 10;) {//slowly start turning
@@ -128,7 +128,7 @@ void junction(string *junction_string) {
             In case the direction is already chosen it just goes to the already chosen direction
      */
 
-    if (SensorValue[S1] < (mincolor + 20) && SensorValue[S2] < (minlight + 20)) {//the minimul light value + 10 for the correct moment to stop at a line
+    if (SensorValue[S1] < (mincolor + 25) && SensorValue[S2] < (minlight + 25)) {//the minimul light value + 10 for the correct moment to stop at a line
         setMultipleMotors(50, motorA, motorB); //Drive the cart forward a little for 50 miliseconds. This way it ends up more straight on the line after turning
         wait1Msec(50);
         stopTask(music); //stops the music
@@ -154,7 +154,7 @@ void junction(string *junction_string) {
                 motor(motorB) = 0;
                 *junction_string = "";
                 while (1) {
-                    if (SensorValue[S2] < 65) {//light sensor check
+                    if (SensorValue[S2] < 57) {//light sensor check
                         wait1Msec(5);
                         setMultipleMotors(0, motorA, motorB);
                         break;
