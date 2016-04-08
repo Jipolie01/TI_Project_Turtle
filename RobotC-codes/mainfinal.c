@@ -22,8 +22,8 @@ int maxcolor = 56;
 int mincolor = 20;
 int maxlight = 69;
 int minlight = 34;
-int limit = 65;
-int speed = 40;
+int limit = 65;//limit to make sure that the robot can make a sharp turn
+int speed = 40;// the standard speed for motorA and motorB max = 50
 void speed_adjust(int index, int until, int increment) {
     /*
             This function is used for slowing down the motor slowly instead of stopping immediatly
@@ -84,10 +84,11 @@ void linefollow(void) {
         float formule;
         float formule2;
         //forule caluculates motor value
-
+//forule caluculates motor value[ standard speed + stepsize* number of steps ]
     formule =speed+(speed / (maxlight-minlight))*(maxlight-light);
+	//forule caluculates motor value[ standard speed - stepsize* number of steps ]
     formule2 = speed-(speed / (maxlight-minlight))*(maxlight-light);
-	if (formule >limit)
+	if (formule >limit)// limit is to make sharoper turns possible
     					{
     				formule = (2*speed);
     				formule2 = 0;
@@ -103,11 +104,12 @@ void linefollow(void) {
         float formule;
         float formule2;
 
-//forule caluculates motor value
+//forule caluculates motor value[ standard speed +stepsize* number of steps ]
               formule =speed+(speed / (maxcolor-mincolor))*(maxcolor-color);
+			  //forule caluculates motor value[ standard speed - stepsize* number of steps ]
     					formule2 = speed-(speed / (maxcolor-mincolor))*(maxcolor-color);
 
-    					if (formule >limit)
+    					if (formule >limit)// limit is to make sharoper turns possible
     					{
     				formule = (2*speed);
     				formule2 = 0;
