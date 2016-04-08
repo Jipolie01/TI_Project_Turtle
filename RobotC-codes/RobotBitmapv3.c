@@ -22,6 +22,7 @@ int maxlight = 69;
 int minlight = 34;
 int counter = 0;
 //int i,j;
+//this are the global variabels used for finding the route through the matrix
 int holding1,holding2;
 int startrow, startcollumn;
 int endrow, endcollumn;
@@ -29,6 +30,7 @@ int currentrow,currentcollumn;
 int currentjunctionrow = 0,currentjunctioncollumn = 0;
 int around_object = 0;
 char first_junction = '0';
+//This array is used to store the new instructions in
 char new_matrix[20];
 char turn_left = 'L';
 char turn_right = 'R';
@@ -37,7 +39,13 @@ char down = 'D';
 void steering_sideways();
 void finding_route();
 
-int matrix[11][11] =				{   {0,1,0,1,0,1,0,1,0,1,0},
+
+//This is the matrix used for finding the route
+//1: Is a place you can drive through
+//2: Is the place where the robot is currently standing
+//4: Is a junction
+//5: This is the endpoint, so this is where the robot needs to go
+int matrix[11][11] =		{   {0,1,0,1,0,1,0,1,0,1,0},
                                 {1,4,1,4,1,4,1,4,1,4,1},
                                 {0,1,0,1,0,1,0,1,0,1,0},
                                 {1,4,1,4,1,4,1,4,1,5,1},
@@ -49,8 +57,10 @@ int matrix[11][11] =				{   {0,1,0,1,0,1,0,1,0,1,0},
                                 {1,4,1,4,1,4,1,4,1,4,1},
                                 {0,1,0,1,0,1,0,1,0,1,0}};
 
+//This array saves al the coordinates of the junctions, used for the route. 
 int junctions[20][2];
-
+/*This array is used to store all the instructions in, later these are gonna be 
+ * used to give the good driving instructions to the robot*/
 char instructions[20];
 
 void speed_adjust(int index, int until, int increment) {
@@ -64,12 +74,14 @@ void speed_adjust(int index, int until, int increment) {
 }
 
 void left(){
+    //This function is used to change setting when the robot is turned to the left 
         turn_left = 'U';
         turn_right = 'D';
         up = 'R';
         down = 'L';
 }
 void right(){
+    //This function is used to change setting when the robot is turned to the right
     turn_right = 'U';
     turn_left = 'D';
     up = 'L';
@@ -77,6 +89,7 @@ void right(){
 }
 
 void up_settings(){
+        //This function is used to change setting when the robot driving upwards
     turn_right = 'R';
     turn_left = 'L';
     up = 'U';
@@ -84,11 +97,20 @@ void up_settings(){
 }
 
 void adding_instructions(char first_junction){
-    instructions[counter] = first_junction;
-    counter++;
+    // This function is used to add instructions. char first_junction
+    instructions[tellen] = first_junction;
+    tellen++;
+    /*
+     Here is the problem:
+        The variable use perviously was counter, because counter stayed a 1
+         (this happens when the robot is stopped at the 2nd junction)
+        If you change the variable to tellen (wich becomes 0 before hand)
+        THe instructions are put into the right place in the array
+     */
 }
 
 void down_setting(){
+    //This function is used to change setting when the robot is facing downwards
     turn_left =  'R';
     turn_right = 'L';
     up = 'D';
@@ -96,16 +118,30 @@ void down_setting(){
 }
 
 void calculate(){
+    //This function is used to calculate the correct route.
+    /* For example 
+        Are the instructions: rr
+        This means that the robot is turned right on the first
+        instructions, but then needs to go up
+        So the actual instructions are:
+         RU
+        This function calculates how the robot is standing, and converts the 
+         instruction to the right one 
+     */
     int i = 0;
     while(instructions[i] != '0'){
+        //As long as there is no 0 in the array there can be instructions calculated 
         	if(instructions[i] == 'l'){
+                //If the first instruction is left, the left setting are on. 
             	new_matrix[i] = turn_left;
             	left();
             	i++;
             	while(1){
             		nxtDisplayTextLine(2, "Turning Left");
             			if((instructions[i] != 'u') && (instructions[i] != '0')){
-                			if(instructions[i] == 'l'){
+                			//Als long as the instruction is not up (wich means the robot is going up agian)
+                            //The left settings are used 
+                            if(instructions[i] == 'l'){
                     			new_matrix[i] = turn_left;
                 			}else if(instructions[i] == 'r'){
                     			new_matrix[i] = turn_right;
@@ -125,6 +161,7 @@ void calculate(){
             }}
         }else if((instructions[i] == 'r') && (instructions[i] != '0')){
             new_matrix[i] = turn_right;
+            //This works the same as left, only now with right  
             right();
             i++;
             while(1){
@@ -151,6 +188,7 @@ void calculate(){
         }else if((instructions[i] == 'u') && (instructions[i] != '0')){
           nxtDisplayTextLine(4, "Going up");
         	new_matrix[i] = up;
+            //If the next instruction is up, the settings aren't changing
             i++;
         }
     }
@@ -158,22 +196,30 @@ void calculate(){
 
 
 void steering_sideways(){
+    //This function is used to steer sideways on the matrix
     if(currentcollumn < endcollumn){ //++
+    //This if statement is used to dertermine whether or not the route wants to go left or right
 			if(matrix[currentrow][currentcollumn+1] == 1){
 				currentcollumn++;
                 adding_instructions('r');
+                //If the robot can go right, the right instruction is added to make sure it is saved 
 			}else if(matrix[currentrow][currentcollumn+1] == 4){
+                //This if statement is used when there is a junction
                 currentcollumn++;
                 currentjunctionrow = currentrow;
                 currentjunctioncollumn = currentcollumn;
                 junctions[counter][0] = currentjunctionrow;
                 junctions[counter][1] = currentjunctioncollumn;
+                //THis junction is now saved so it can be used later
                 if(currentrow == endrow){
                         if(matrix[currentrow][currentcollumn+1] == 1){
                             currentcollumn++;
                             adding_instructions('r');
+                            //If the robot needs to go right and can go right, the instruction is added
                         }else if(matrix[currentrow][currentcollumn+1] == 0){
                             if((currentrow != 0) && (around_object == 0)){
+                                //If the is an object there, the route drives manually around the object 
+                                //THis happens above
                                 sleep(1);
                                 around_object = 1;
                                 adding_instructions('u');
@@ -196,6 +242,7 @@ void steering_sideways(){
                                adding_instructions('0');
                               }
                             }else if((currentrow != 11) && (around_object == 0)){
+                                //THis is the same as above
                                 sleep(1);
                                 around_object = 1;
                                 adding_instructions('d');
@@ -223,9 +270,11 @@ void steering_sideways(){
                 }
 		}else if(matrix[currentrow][currentcollumn+1] == 5){
             currentcollumn++;
+            //If the next place in the matrix is a 5 this is the endpoint and a 0 is added to the array
             adding_instructions('0');
             }
 	else if(currentcollumn > endcollumn){ //--
+    //This is the same steering concept, only now for going left
 			if(matrix[currentrow][currentcollumn-1] == 1){
 				currentcollumn--;
 			}else if(matrix[currentrow][currentcollumn-1] == 4){
@@ -296,6 +345,7 @@ void steering_sideways(){
 
 void finding_place(int place_number)
 {
+    //This functions goes through the matrix and saves the coordinates of the place_number
 		for(int i = 0; i<11; i++){
     	for (int k = 0; k<11; k++){
     		if (matrix[i][k] ==place_number){
@@ -307,6 +357,7 @@ void finding_place(int place_number)
 }
 
 void get_places(){
+    //This function is used to save the coordinates for the beginning and end point 
     finding_place(2);
     startrow = holding1;
     startcollumn = holding2;
@@ -319,6 +370,8 @@ void get_places(){
 }
 
 void finding_route(){
+    //This is the function that finds the route
+    //THis is the if the same as steering sideways
 	if(currentrow < endrow){ //++
 		if(matrix[currentrow + 1][currentcollumn] == 1){
 			currentcollumn++;
@@ -371,6 +424,7 @@ void finding_route(){
 		}else if(matrix[currentrow-1][currentcollumn] == 0){
             steering_sideways();
         }
+        //If you are already on the same height in the map, you can go sideways 
 	}else if(currentrow == endrow){ //sideways
 		steering_sideways();
 }
@@ -504,14 +558,14 @@ void junction() {
 
         while (1) {
         		nxtDisplayTextLine(0, "Counter: %d %c", counter, new_matrix[counter]);
-            if (new_matrix[counter] == 'L') {//if the input is "LEFT" turn left until you read the black line color and then continue your normal duty
+            if (new_matrix[counter] == 'L') {//if the insdtruction is "L" turn left until you read the black line color and then continue your normal duty
                 motor(motorA) = 0;
                 motor(motorB) = 40;
                 while (1) {
                     if (SensorValue[S1] < 30) {//color sensor check
                         wait1Msec(5);
                         setMultipleMotors(0, motorA, motorB);
-                        counter++;
+                        counter++; // The counter is now added so that the next time a different instruction is added 
                         break;
                     }
                 }
