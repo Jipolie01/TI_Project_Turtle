@@ -1,3 +1,4 @@
+//Function prototypes for the linker to grab
 #ifndef BLUETOOTH_H_
 	#define BLUETOOTH_H_
 	void check_bluetooth(string *s);
